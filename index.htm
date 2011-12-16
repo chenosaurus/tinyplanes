@@ -1,0 +1,137 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <title>Planes</title>
+
+    <style type="text/css">
+
+      body {
+        margin: 0px;
+        padding: 0px;
+      }
+
+      .plane {
+        position: absolute;
+        height: 60px;
+        width: 60px;
+        top: -1000px;
+        left: -1000px;
+        text-align: center;
+        font-size: 60px;
+        line-height: 60px;
+        -moz-user-select: -moz-none;
+        -khtml-user-select: none;
+        -webkit-user-select: none;
+        user-select: none;
+        color: #444;
+        text-shadow: 0px 3px 10px rgba(0, 0, 0, .4);
+      }
+
+    </style>
+
+  </head>
+
+
+  <body>
+
+
+    <div id="me" class="plane">&#9992;</div>
+  </body>
+
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/mootools/1.3.2/mootools-yui-compressed.js"></script>
+
+  <script type="text/javascript">
+
+    var Plane = new Class({
+      Implements: Options,
+
+      options: {
+        position: {x: 0, y: 0},
+        velocity: 1,
+        angle: 0,
+        $el: null
+      },
+
+      initialize: function(options) {
+        this.setOptions(options);
+        this.attachControl();
+      },
+
+      attachControl: function() {
+        window.addEvent('keydown', this.keydown.bind(this));
+      },
+
+      keydown: function(e) {
+        if (e.key == "right") {
+          this.options.angle += 2.5;
+          if (this.options.angle >= 360) {
+            this.options.angle = 0;
+          }
+        } else if (e.key == "left") {
+          this.options.angle -= 2.5;
+          if (this.options.angle <= 0) {
+            this.options.angle = 360;
+          }
+        } else if (e.key == "up") {
+          this.options.velocity += .1;
+          if (this.options.velocity > 5) {
+            this.options.velocity = 5
+          }
+        } else if (e.key == "down") {
+          this.options.velocity -= .1;
+          if (this.options.velocity < .3) {
+            this.options.velocity = .3
+          }
+        }
+
+      },
+
+      start: function() {
+        this.animTimer = setInterval(this.update.bind(this), 25);
+      },
+
+      stop: function() {
+        clearInterval(this.animTimer);
+      },
+
+      getDelta: function() {
+        var angle = this.getAngle();
+
+        return {
+          x: Math.cos(angle) * this.options.velocity,
+          y: Math.sin(angle) * this.options.velocity
+        };
+      },
+
+      updatePosition: function() {
+        var d = this.getDelta();
+        this.options.position.x += d.x;
+        this.options.position.y += d.y;
+      },
+
+      getAngle: function() {
+        return - (360 - this.options.angle) * (Math.PI / 180);
+      },
+
+      update: function() {
+        var pos = this.updatePosition();
+
+        this.options.$el.setStyles({
+          "-webkit-transform": "rotate(" + this.options.angle + "deg)",
+          "-moz-transform": "rotate(" + this.options.angle + "deg)",
+          "top": this.options.position.y,
+          "left": this.options.position.x
+        })
+      }
+
+    });
+
+
+    var plane = new Plane({
+      $el: $('me'),
+      position: {x: 100, y: 100}
+    });
+
+    plane.start();
+  </script>
+</html>
